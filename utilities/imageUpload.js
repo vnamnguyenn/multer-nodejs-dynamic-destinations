@@ -2,6 +2,7 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const sharp = require('sharp');
 const path = require('path');
+const fs = require('fs')
 
 const upload = multer({
     limits: {
@@ -22,12 +23,12 @@ const upload = multer({
 })
 
 class Resize {
-    constructor(folder) {
-        this.folder = folder;
+    constructor(directory) {
+        this.directory = directory;
     }
     async save(buffer, ext, reSize) {
-        const filename = `${uuidv4()}.png`;
-        const filepath = path.resolve(`${this.folder}/${filename}`)
+        const filename = uuidv4() + ext;
+        const filepath = path.resolve(`${this.directory}/${filename}`)
         const file = {
             filename: filename,
             filepath: filepath
@@ -36,6 +37,18 @@ class Resize {
         await sharp(buffer).resize(400, 400, { fit: sharp.fit.inside, withoutEnlargement: true }).toFile(filepath);
 
         return file;
+    }
+    checkExistFolder(directory) {
+        try {
+            if (!fs.existsSync(directory)) {
+                fs.mkdirSync(directory)
+
+            }
+            return true;
+        } catch (error) {
+            console.log("An error occurred.")
+            return false;
+        }
     }
 
 }
